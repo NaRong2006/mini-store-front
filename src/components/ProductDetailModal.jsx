@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import {
   X,
   Package,
@@ -10,6 +10,7 @@ import {
   Boxes,
   TrendingUp,
 } from 'lucide-react'
+import { getImageUrl } from '../utils/api'
 
 export default function ProductDetailModal({
   isOpen,
@@ -17,6 +18,16 @@ export default function ProductDetailModal({
   product,
   onEdit,
 }) {
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const [imgError, setImgError] = useState(false)
+  const [prevProductId, setPrevProductId] = useState(product?.id)
+
+  if (product?.id !== prevProductId) {
+    setPrevProductId(product?.id)
+    setSelectedImageIndex(0)
+    setImgError(false)
+  }
+
   // Close on Escape key
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -30,11 +41,29 @@ export default function ProductDetailModal({
 
   if (!isOpen || !product) return null
 
-  const imageSrc =
-    product.image ||
-    (Array.isArray(product.images) && product.images.length > 0 ? product.images[0].image : null) || null
+  // Collect all image sources available for this product
+  const allImages = []
+  if (Array.isArray(product.images)) {
+    product.images.forEach((img) => {
+      const src = typeof img === 'string' ? img : (img?.url || img?.image)
+      if (src && !allImages.includes(src)) allImages.push(src)
+    })
+  }
+  if (Array.isArray(product.rawProduct?.images)) {
+    product.rawProduct.images.forEach((img) => {
+      const src = typeof img === 'string' ? img : (img?.url || img?.image)
+      if (src && !allImages.includes(src)) allImages.push(src)
+    })
+  }
+  if (product.image && !allImages.includes(product.image)) {
+    allImages.unshift(product.image)
+  }
+  if (product.image_url && !allImages.includes(product.image_url)) {
+    allImages.unshift(product.image_url)
+  }
 
-  const formattedImage = imageSrc ? (imageSrc.startsWith('http') ? imageSrc : `http://127.0.0.1:8000/storage/${imageSrc}`) : null
+  const activeImageSrc = allImages[selectedImageIndex] || product.image || product.image_url || null
+  const formattedImage = getImageUrl(activeImageSrc)
 
   const isOutOfStock = product.stock <= 0
   const isLowStock = product.stock > 0 && product.stock <= 20
@@ -78,40 +107,71 @@ export default function ProductDetailModal({
           {/* Main Product Showcase: Large Image and Core Details */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 items-start">
             {/* Image Showcase Container */}
-            <div className="relative w-full aspect-square bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-center p-4 overflow-hidden group">
-              {formattedImage ? (
-                <img
-                  src={formattedImage}
-                  alt={product.name}
-                  className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
-              ) : (
-                <div className="flex flex-col items-center justify-center text-neutral-400 gap-2">
-                  <Package size={48} className="text-neutral-300 dark:text-neutral-600" />
-                  <span className="text-[11px] font-medium">គ្មានរូបភាព</span>
+            <div className="flex flex-col gap-2">
+              <div className="relative w-full aspect-square bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-center p-4 overflow-hidden group">
+                {formattedImage && !imgError ? (
+                  <img
+                    src={formattedImage}
+                    alt={product.name}
+                    className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                    onError={() => setImgError(true)}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-neutral-400 gap-2">
+                    <Package size={48} className="text-neutral-300 dark:text-neutral-600" />
+                    <span className="text-[11px] font-medium text-neutral-500">គ្មានរូបភាព</span>
+                  </div>
+                )}
+                {/* Badges on Image */}
+                <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 pointer-events-none">
+                  <span className="px-2 py-0.5 bg-black/80 dark:bg-white/90 text-white dark:text-black font-mono text-[10px] font-bold uppercase tracking-wider backdrop-blur-xs">
+                    {product.sku || 'SKU'}
+                  </span>
+                </div>
+                <div className="absolute top-2.5 right-2.5 pointer-events-none">
+                  <span
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold border backdrop-blur-xs ${
+                      product.status
+                        ? 'bg-emerald-500/90 text-white border-emerald-400'
+                        : 'bg-neutral-500/90 text-white border-neutral-400'
+                    }`}
+                  >
+                    {product.status ? <CheckCircle2 size={10} /> : <XCircle size={10} />}
+                    <span>{product.status ? 'សកម្ម' : 'អសកម្ម'}</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Gallery Thumbnails if multiple images exist */}
+              {allImages.length > 1 && (
+                <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                  {allImages.map((img, idx) => {
+                    const thumbUrl = getImageUrl(img)
+                    const isSelected = idx === selectedImageIndex
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setSelectedImageIndex(idx)
+                          setImgError(false)
+                        }}
+                        className={`w-12 h-12 border shrink-0 p-0.5 transition-all cursor-pointer rounded-none bg-neutral-100 dark:bg-neutral-900 ${
+                          isSelected
+                            ? 'border-black dark:border-white ring-1 ring-black dark:ring-white'
+                            : 'border-neutral-300 dark:border-neutral-800 opacity-60 hover:opacity-100'
+                        }`}
+                      >
+                        <img
+                          src={thumbUrl}
+                          alt={`Thumbnail ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    )
+                  })}
                 </div>
               )}
-              {/* Badges on Image */}
-              <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
-                <span className="px-2 py-0.5 bg-black/80 dark:bg-white/90 text-white dark:text-black font-mono text-[10px] font-bold uppercase tracking-wider backdrop-blur-xs">
-                  {product.sku || 'SKU'}
-                </span>
-              </div>
-              <div className="absolute top-2.5 right-2.5">
-                <span
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold border backdrop-blur-xs ${
-                    product.status
-                      ? 'bg-emerald-500/90 text-white border-emerald-400'
-                      : 'bg-neutral-500/90 text-white border-neutral-400'
-                  }`}
-                >
-                  {product.status ? <CheckCircle2 size={10} /> : <XCircle size={10} />}
-                  <span>{product.status ? 'សកម្ម' : 'អសកម្ម'}</span>
-                </span>
-              </div>
             </div>
 
             {/* Core Specs / Right Info */}

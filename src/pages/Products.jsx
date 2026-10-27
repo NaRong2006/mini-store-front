@@ -94,7 +94,7 @@ import AddProductModal from '../components/AddProductModal'
 import ProductDetailModal from '../components/ProductDetailModal'
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal'
 import TablePagination from '../components/TablePagination'
-import api from '../utils/api'
+import api, { getImageUrl } from '../utils/api'
 
 export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -117,10 +117,14 @@ export default function Products() {
   const [products, setProducts] = useState([])
 
   const mapProduct = (item) => {
-    const rawImage = Array.isArray(item.images) && item.images.length > 0 ? item.images[0].image : null
-    const image = rawImage
-      ? (rawImage.startsWith('http') ? rawImage : `http://127.0.0.1:8000/storage/${rawImage}`)
-      : null
+    const rawImage =
+      item.image_url ||
+      item.image ||
+      (Array.isArray(item.images) && item.images.length > 0
+        ? (item.images[0].url || item.images[0].image)
+        : null) ||
+      null;
+    const image = getImageUrl(rawImage);
 
     return {
       id: item.id,
@@ -509,9 +513,25 @@ export default function Products() {
                       #{p.id}
                     </td>
                     <td className="py-3 px-3.5 font-bold text-black dark:text-white whitespace-nowrap min-w-0">
-                      <span className="text-xs font-bold text-black dark:text-white truncate block hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors" title={p.name}>
-                        {p.name}
-                      </span>
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 shrink-0 overflow-hidden flex items-center justify-center">
+                          {p.image ? (
+                            <img
+                              src={p.image}
+                              alt={p.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <span className="text-[9px] text-neutral-400 font-bold">N/A</span>
+                          )}
+                        </div>
+                        <span className="text-xs font-bold text-black dark:text-white truncate block hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors" title={p.name}>
+                          {p.name}
+                        </span>
+                      </div>
                     </td>
                     <td className="py-3 px-3 whitespace-nowrap">
                       <span className="font-mono text-neutral-700 dark:text-neutral-300 text-[11px] bg-neutral-100/90 dark:bg-neutral-800/90 px-2 py-0.5 border border-neutral-200 dark:border-neutral-700/80 font-semibold inline-block">
