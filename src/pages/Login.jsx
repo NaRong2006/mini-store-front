@@ -92,8 +92,12 @@ export default function Login() {
     } catch (error) {
       if (error.response?.status === 403 && error.response?.data?.message) {
         setErrorMessage(error.response.data.message)
-      } else if (error.response?.data?.message) {
+      } else if (error.response?.status === 401) {
         setErrorMessage('អ៊ីមែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ!')
+      } else if (error.response?.status === 500) {
+        setErrorMessage('មានបញ្ហានៅលើ Server (HTTP 500 Server Error)៖ សូមពិនិត្យមើល Environment Variables នៅលើ Render!')
+      } else if (error.response?.data?.message) {
+        setErrorMessage(error.response.data.message)
       } else {
         setErrorMessage('មិនអាចតភ្ជាប់ទៅកាន់ API Server បានទេ។ សូមពិនិត្យមើលការតភ្ជាប់បណ្តាញរបស់អ្នក!')
       }
