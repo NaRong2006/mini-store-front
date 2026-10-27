@@ -96,93 +96,6 @@ import ConfirmDeleteModal from '../components/ConfirmDeleteModal'
 import TablePagination from '../components/TablePagination'
 import api from '../utils/api'
 
-const initialProducts = [
-  {
-    id: 14,
-    name: 'Dell 2026',
-    sku: 'DELL-2026',
-    image: 'http://127.0.0.1:8000/storage/product_images/DDLhRMS6OVRu2snhJm03YTYbPVYsGi6MANOGR48u.webp',
-    category: 'LAPTOP',
-    brand: 'DELL',
-    price: '$1,399.99',
-    discount: '0%',
-    stock: 100,
-    sales: '0 គ្រឿង',
-    status: true,
-    stockStatus: 'in_stock',
-  },
-  {
-    id: 13,
-    name: 'Asus Rog Strix Scar 18',
-    sku: 'ASUS-ROG-18',
-    image: 'http://127.0.0.1:8000/storage/product_images/h2vobNdH1q72nBQiHpV0RKW6X5UK13LKJt7maLb2.jpg',
-    category: 'LAPTOP',
-    brand: 'ASUS',
-    price: '$2,899.00',
-    discount: '0%',
-    stock: 100,
-    sales: '0 គ្រឿង',
-    status: true,
-    stockStatus: 'in_stock',
-  },
-  {
-    id: 11,
-    name: 'Iphone 11 Pro Max',
-    sku: 'IPHONE-11-PM',
-    image: 'http://127.0.0.1:8000/storage/product_images/lnOpJDGHXPvsPfjjsRuHVokj7HCu5s6yRCCW3Akp.jpg',
-    category: 'SMART PHONE',
-    brand: 'APPLE',
-    price: '$199.99',
-    discount: '0%',
-    stock: 99,
-    sales: '0 គ្រឿង',
-    status: true,
-    stockStatus: 'in_stock',
-  },
-  {
-    id: 9,
-    name: 'Iphone 15 Pro Max',
-    sku: 'IPHONE-15-PM',
-    image: 'http://127.0.0.1:8000/storage/product_images/oFxBYH4I9G8i8Q4EjhoWCjuyXyfpBbAIo6pB6cSM.png',
-    category: 'SMART PHONE',
-    brand: 'APPLE',
-    price: '$599.99',
-    discount: '0%',
-    stock: 100,
-    sales: '0 គ្រឿង',
-    status: true,
-    stockStatus: 'in_stock',
-  },
-  {
-    id: 2,
-    name: 'Iphone 17 Pro Max',
-    sku: 'SKU-Z4ZJH6KJKE',
-    image: 'http://127.0.0.1:8000/storage/product_images/kE1l2qBdPyCo5qZi1IQV06ufJ0vHYhKTSDCvzcXQ.webp',
-    category: 'SMART PHONE',
-    brand: 'APPLE',
-    price: '$1,599.99',
-    discount: '0%',
-    stock: 94,
-    sales: '3 គ្រឿង',
-    status: true,
-    stockStatus: 'in_stock',
-  },
-  {
-    id: 1,
-    name: 'Iphone 18 Pro Max',
-    sku: 'SKU-Z4ZJH6KJKE-1',
-    image: 'http://127.0.0.1:8000/storage/product_images/9Yb2P04fPbogbQD2ljzPYVUO2jbnqpGKonCDfSPB.jpg',
-    category: 'SMART PHONE',
-    brand: 'APPLE',
-    price: '$1,599.99',
-    discount: '0%',
-    stock: 100,
-    sales: '0 គ្រឿង',
-    status: true,
-    stockStatus: 'in_stock',
-  },
-]
-
 export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [isAddOpen, setIsAddOpen] = useState(() => searchParams.get('action') === 'new')
@@ -201,7 +114,7 @@ export default function Products() {
   const [pageSize, setPageSize] = useState(10)
 
   // Real initial products in mini-store database
-  const [products, setProducts] = useState(initialProducts)
+  const [products, setProducts] = useState([])
 
   const mapProduct = (item) => {
     const rawImage = Array.isArray(item.images) && item.images.length > 0 ? item.images[0].image : null
@@ -214,8 +127,8 @@ export default function Products() {
       name: item.name,
       sku: item.sku,
       image,
-      category: item.category?.name || (item.category_id === 1 ? 'LAPTOP' : item.category_id === 2 ? 'SMART PHONE' : 'SPEAKER'),
-      brand: item.brand?.name || (item.brand_id === 5 ? 'APPLE' : item.brand_id === 4 ? 'DELL' : item.brand_id === 3 ? 'ASUS' : 'SAMSUNG'),
+      category: item.category?.name || '-',
+      brand: item.brand?.name || '-',
       price: `$${parseFloat(item.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       discount: item.discount && parseFloat(item.discount) > 0 ? `${parseFloat(item.discount) * 100}%` : '0%',
       stock: item.stock,
@@ -241,12 +154,10 @@ export default function Products() {
     api.get('/products')
       .then((res) => {
         const prodList = res.data?.data || (Array.isArray(res.data) ? res.data : [])
-        if (Array.isArray(prodList) && prodList.length > 0) {
-          const mapped = prodList.map(mapProduct)
+        const mapped = prodList.map(mapProduct)
           setProducts(mapped)
           setToastMessage('បានធ្វើបច្ចុប្បន្នភាពបញ្ជីទំនិញ!')
           setTimeout(() => setToastMessage(''), 2500)
-        }
       })
       .catch(() => {})
       .finally(() => setLoading(false))

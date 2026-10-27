@@ -49,10 +49,10 @@ export default function Users() {
       birthday: profile?.birthday || null,
       bio: profile?.bio || null,
       hasProfile: Boolean(profilePhone || profileAddress || rawAvatar || profile?.birthday || profile?.bio),
-      verified: Boolean(u.email_verified_at || u.id === 1 || u.id === 29 || u.id === 3 || u.id === 4 || u.id === 5),
+      verified: Boolean(u.email_verified_at),
       role: roleName,
       status: Boolean(u.is_active),
-      joined: u.created_at ? u.created_at.split('T')[0] : '2026-10-01',
+      joined: u.created_at ? u.created_at.split('T')[0] : '-',
       rawUser: u,
     }
   }

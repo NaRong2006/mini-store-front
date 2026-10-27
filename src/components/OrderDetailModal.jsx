@@ -12,50 +12,19 @@ import {
   Banknote,
 } from 'lucide-react'
 
-const DEFAULT_PRODUCT_IMAGE =
-  'http://127.0.0.1:8000/storage/product_images/kE1l2qBdPyCo5qZi1IQV06ufJ0vHYhKTSDCvzcXQ.webp'
-
 // Robust product image resolver
 const resolveProductImage = (it, order) => {
-  // 1. Direct item image property
-  if (it?.image) {
-    return it.image.startsWith('http') ? it.image : `http://127.0.0.1:8000/storage/${it.image}`
-  }
-  // 2. Product images array
+  if (it?.image) return it.image.startsWith('http') ? it.image : `http://127.0.0.1:8000/storage/${it.image}`
   if (it?.product?.images && it.product.images.length > 0) {
     const raw = it.product.images[0].image
     if (raw) return raw.startsWith('http') ? raw : `http://127.0.0.1:8000/storage/${raw}`
   }
-  // 3. Product direct image
   if (it?.product?.image) {
     const raw = it.product.image
-    return raw.startsWith('http') ? raw : `http://127.0.0.1:8000/storage/${raw}`
+    if (raw) return raw.startsWith('http') ? raw : `http://127.0.0.1:8000/storage/${raw}`
   }
-  // 4. Order thumbnail
-  if (order?.productThumb) {
-    return order.productThumb
-  }
-  // 5. Match by product title
-  const name = String(it?.name || it?.product_name || order?.product || '').toLowerCase()
-  if (name.includes('18')) {
-    return 'http://127.0.0.1:8000/storage/product_images/9Yb2P04fPbogbQD2ljzPYVUO2jbnqpGKonCDfSPB.jpg'
-  }
-  if (name.includes('17')) {
-    return 'http://127.0.0.1:8000/storage/product_images/kE1l2qBdPyCo5qZi1IQV06ufJ0vHYhKTSDCvzcXQ.webp'
-  }
-  if (name.includes('15')) {
-    return 'http://127.0.0.1:8000/storage/product_images/oFxBYH4I9G8i8Q4EjhoWCjuyXyfpBbAIo6pB6cSM.png'
-  }
-  if (name.includes('11')) {
-    return 'http://127.0.0.1:8000/storage/product_images/lnOpJDGHXPvsPfjjsRuHVokj7HCu5s6yRCCW3Akp.jpg'
-  }
-  if (name.includes('asus') || name.includes('rog') || name.includes('scar')) {
-    return 'http://127.0.0.1:8000/storage/product_images/h2vobNdH1q72nBQiHpV0RKW6X5UK13LKJt7maLb2.jpg'
-  }
-  if (name.includes('dell')) {
-    return 'http://127.0.0.1:8000/storage/product_images/DDLhRMS6OVRu2snhJm03YTYbPVYsGi6MANOGR48u.webp'
-  }
-  return DEFAULT_PRODUCT_IMAGE
+  if (order?.productThumb) return order.productThumb
+  return null
 }
 
 export default function OrderDetailModal({ isOpen, onClose, order, onUpdateStatus }) {
@@ -196,17 +165,17 @@ export default function OrderDetailModal({ isOpen, onClose, order, onUpdateStatu
         })
       : [
           {
-            name: order.product || 'Iphone 17 Pro Max (x1)',
+            name: order.product || '-',
             image: resolveProductImage(null, order),
             quantity: 1,
-            price: order.amount || '$1,599.99',
-            subtotal: order.amount || '$1,599.99',
+            price: order.amount || '$0.00',
+            subtotal: order.amount || '$0.00',
           },
         ]
 
-  const subtotalDisplay = order.subtotal || order.amount || '$1,599.99'
+  const subtotalDisplay = order.subtotal || order.amount || '$0.00'
   const discountDisplay = order.discount ? `-$${Number(order.discount).toFixed(2)}` : '-$0.00'
-  const totalDisplay = order.total || order.amount || '$1,599.99'
+  const totalDisplay = order.total || order.amount || '$0.00'
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">

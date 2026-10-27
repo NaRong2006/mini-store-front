@@ -23,20 +23,20 @@ export default function Reports() {
         if (res.data && Array.isArray(res.data.items)) {
           const mapped = res.data.items.map((o) => {
             const firstItem = o.items && o.items[0]
-            const productName = firstItem?.product?.name || firstItem?.product_name || 'Iphone 17 Pro Max'
+            const productName = firstItem?.product?.name || firstItem?.product_name || '-'
             const qty = firstItem?.quantity || 1
             const totalNum =
               parseFloat(o.total || 0) ||
-              parseFloat(firstItem?.price || firstItem?.product?.price || 1599.99) * qty
+              parseFloat(firstItem?.price || firstItem?.product?.price || 0) * qty
             return {
               id: o.order_number || `ORD-${o.id}`,
-              customer: o.user?.name || 'Mu Chen',
-              email: o.user?.email || 'muchen@gmail.com',
+              customer: o.user?.name || o.customer_name || 'អតិថិជនទូទៅ',
+              email: o.user?.email || o.customer_email || '-',
               product: `${productName} (x${qty})`,
               amount: `$${totalNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
               paymentStatus: o.payment_status || 'paid',
               orderStatus: o.status || 'confirmed',
-              date: o.created_at ? o.created_at.split('T')[0] : '2026-10-25',
+              date: o.created_at ? o.created_at.split('T')[0] : '-',
             }
           })
           setRealOrders(mapped)

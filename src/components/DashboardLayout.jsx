@@ -419,7 +419,12 @@ export default function DashboardLayout({ children, searchQuery, onSearchChange 
                   </div>
 
                   <div className="divide-y divide-neutral-100 dark:divide-neutral-800 max-h-80 overflow-y-auto">
-                    {notifications.map((n) => (
+                    {notifications.length === 0 ? (
+                      <div className="p-6 text-center text-xs text-neutral-400 font-medium">
+                        គ្មានការជូនដំណឹងថ្មីទេ
+                      </div>
+                    ) : (
+                      notifications.map((n) => (
                       <div
                         key={n.id}
                         className={`p-3 text-xs hover:bg-neutral-50 dark:hover:bg-neutral-800/60 transition-colors ${
@@ -439,7 +444,7 @@ export default function DashboardLayout({ children, searchQuery, onSearchChange 
                           {n.time}
                         </span>
                       </div>
-                    ))}
+                    )))}
                   </div>
 
                   <div className="p-2 border-t border-neutral-200 dark:border-neutral-800 text-center bg-neutral-50 dark:bg-neutral-800/50">

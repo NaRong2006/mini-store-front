@@ -32,12 +32,9 @@ export default function ProductDetailModal({
 
   const imageSrc =
     product.image ||
-    (Array.isArray(product.images) && product.images.length > 0 ? product.images[0].image : null) ||
-    'http://127.0.0.1:8000/storage/product_images/kE1l2qBdPyCo5qZi1IQV06ufJ0vHYhKTSDCvzcXQ.webp'
+    (Array.isArray(product.images) && product.images.length > 0 ? product.images[0].image : null) || null
 
-  const formattedImage = imageSrc.startsWith('http')
-    ? imageSrc
-    : `http://127.0.0.1:8000/storage/${imageSrc}`
+  const formattedImage = imageSrc ? (imageSrc.startsWith('http') ? imageSrc : `http://127.0.0.1:8000/storage/${imageSrc}`) : null
 
   const isOutOfStock = product.stock <= 0
   const isLowStock = product.stock > 0 && product.stock <= 20
@@ -82,16 +79,21 @@ export default function ProductDetailModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 items-start">
             {/* Image Showcase Container */}
             <div className="relative w-full aspect-square bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-center p-4 overflow-hidden group">
-              <img
-                src={formattedImage}
-                alt={product.name}
-                className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
-                onError={(e) => {
-                  e.currentTarget.onerror = null
-                  e.currentTarget.src =
-                    'http://127.0.0.1:8000/storage/product_images/kE1l2qBdPyCo5qZi1IQV06ufJ0vHYhKTSDCvzcXQ.webp'
-                }}
-              />
+              {formattedImage ? (
+                <img
+                  src={formattedImage}
+                  alt={product.name}
+                  className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none'
+                  }}
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center text-neutral-400 gap-2">
+                  <Package size={48} className="text-neutral-300 dark:text-neutral-600" />
+                  <span className="text-[11px] font-medium">គ្មានរូបភាព</span>
+                </div>
+              )}
               {/* Badges on Image */}
               <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
                 <span className="px-2 py-0.5 bg-black/80 dark:bg-white/90 text-white dark:text-black font-mono text-[10px] font-bold uppercase tracking-wider backdrop-blur-xs">

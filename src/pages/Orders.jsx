@@ -24,93 +24,6 @@ import { exportOrdersToCsv } from '../utils/exportCsv'
 import api from '../utils/api'
 import CountUp from '../components/CountUp'
 
-const initialOrders = [
-  {
-    id: 'ORD-20261008-14',
-    rawId: 14,
-    customer: 'Mu Chen',
-    email: 'muchen@gmail.com',
-    product: 'Iphone 17 Pro Max (x1)',
-    productThumb: 'http://127.0.0.1:8000/storage/product_images/kE1l2qBdPyCo5qZi1IQV06ufJ0vHYhKTSDCvzcXQ.webp',
-    itemsCount: 1,
-    items: [
-      {
-        name: 'Iphone 17 Pro Max',
-        quantity: 1,
-        price: 1599.99,
-        subtotal: 1599.99,
-        image: 'http://127.0.0.1:8000/storage/product_images/kE1l2qBdPyCo5qZi1IQV06ufJ0vHYhKTSDCvzcXQ.webp',
-      },
-    ],
-    amount: '$1,599.99',
-    rawAmount: 1599.99,
-    date: '2026-10-25',
-    time: '10:30',
-    paymentStatus: 'paid',
-    orderStatus: 'confirmed',
-    paymentMethod: 'bank_qr',
-    bankName: 'wingkhppxxx@wing',
-    phone: '012 889 977',
-    address: 'Phnom Penh, Cambodia',
-  },
-  {
-    id: 'ORD-20261008-13',
-    rawId: 13,
-    customer: 'Mu Chen',
-    email: 'muchen@gmail.com',
-    product: 'Iphone 17 Pro Max (x2)',
-    productThumb: 'http://127.0.0.1:8000/storage/product_images/kE1l2qBdPyCo5qZi1IQV06ufJ0vHYhKTSDCvzcXQ.webp',
-    itemsCount: 2,
-    items: [
-      {
-        name: 'Iphone 17 Pro Max',
-        quantity: 2,
-        price: 1599.99,
-        subtotal: 3199.98,
-        image: 'http://127.0.0.1:8000/storage/product_images/kE1l2qBdPyCo5qZi1IQV06ufJ0vHYhKTSDCvzcXQ.webp',
-      },
-    ],
-    amount: '$3,199.98',
-    rawAmount: 3199.98,
-    date: '2026-10-22',
-    time: '14:15',
-    paymentStatus: 'paid',
-    orderStatus: 'confirmed',
-    paymentMethod: 'bank_qr',
-    bankName: 'aclbkhppxxx@aclb',
-    phone: '012 889 977',
-    address: 'Phnom Penh, Cambodia',
-  },
-  {
-    id: 'ORD-20261007-12',
-    rawId: 12,
-    customer: 'Huang Taindi',
-    email: 'huangtaindi@gmail.com',
-    product: 'Iphone 17 Pro Max (x1)',
-    productThumb: 'http://127.0.0.1:8000/storage/product_images/kE1l2qBdPyCo5qZi1IQV06ufJ0vHYhKTSDCvzcXQ.webp',
-    itemsCount: 1,
-    items: [
-      {
-        name: 'Iphone 17 Pro Max',
-        quantity: 1,
-        price: 1599.99,
-        subtotal: 1599.99,
-        image: 'http://127.0.0.1:8000/storage/product_images/kE1l2qBdPyCo5qZi1IQV06ufJ0vHYhKTSDCvzcXQ.webp',
-      },
-    ],
-    amount: '$1,599.99',
-    rawAmount: 1599.99,
-    date: '2026-10-07',
-    time: '15:32',
-    paymentStatus: 'paid',
-    orderStatus: 'confirmed',
-    paymentMethod: 'bank_qr',
-    bankName: 'abaakhppxxx@abaa',
-    phone: '123-456-7890',
-    address: '123 Main St, City, Country',
-  },
-]
-
 export default function Orders() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [search, setSearch] = useState('')
@@ -122,21 +35,19 @@ export default function Orders() {
   const [pageSize, setPageSize] = useState(10)
 
   // Real orders from database
-  const [orders, setOrders] = useState(initialOrders)
+  const [orders, setOrders] = useState([])
 
   const mapOrder = (o) => {
     const rawItems = Array.isArray(o.items) && o.items.length > 0 ? o.items : []
     const firstItem = rawItems[0]
-    const productName = firstItem?.product?.name || firstItem?.product_name || 'Iphone 17 Pro Max'
+    const productName = firstItem?.product?.name || firstItem?.product_name || '-'
     const firstImgRaw = firstItem?.product?.images && firstItem.product.images[0]?.image ? firstItem.product.images[0].image : firstItem?.image
-    const productThumb = firstImgRaw
-      ? (firstImgRaw.startsWith('http') ? firstImgRaw : `http://127.0.0.1:8000/storage/${firstImgRaw}`)
-      : 'http://127.0.0.1:8000/storage/product_images/kE1l2qBdPyCo5qZi1IQV06ufJ0vHYhKTSDCvzcXQ.webp'
+    const productThumb = firstImgRaw ? (firstImgRaw.startsWith('http') ? firstImgRaw : `http://127.0.0.1:8000/storage/${firstImgRaw}`) : null
 
     const formattedItems = rawItems.map((it) => {
       const pName = it.product_name || it.product?.name || 'មុខទំនិញ'
       const qty = it.quantity || 1
-      const price = parseFloat(it.price || it.product?.price || 1599.99)
+      const price = parseFloat(it.price || it.product?.price || 0)
       const subtotal = parseFloat(it.subtotal || price * qty)
       const rawImg = it.product?.images && it.product.images[0]?.image ? it.product.images[0].image : it.image
       const image = rawImg
@@ -166,12 +77,12 @@ export default function Orders() {
 
     const payment = Array.isArray(o.payments) && o.payments.length > 0 ? o.payments[0] : null
     const paymentMethod = payment?.payment_method || o.payment_method || 'bank_qr'
-    const bankName = payment?.bank_name || o.bank_name || (o.id === 12 || o.order_number === 'ORD-20261007-12' ? 'abaakhppxxx@abaa' : o.id === 13 || o.order_number === 'ORD-20261008-13' ? 'aclbkhppxxx@aclb' : 'wingkhppxxx@wing')
+    const bankName = payment?.bank_name || o.bank_name || ''
 
     return {
       id: o.order_number || `ORD-${o.id}`,
-      customer: o.user?.name || 'Mu Chen',
-      email: o.user?.email || 'muchen@gmail.com',
+      customer: o.user?.name || o.customer_name || 'អតិថិជនទូទៅ',
+      email: o.user?.email || o.customer_email || '-',
       phone: o.user?.profile?.phone || null,
       address: o.user?.profile?.address || null,
       product: rawItems.length > 1 ? `${productName} (និង ${rawItems.length - 1} មុខទៀត)` : `${productName} (x${firstItem?.quantity || 1})`,
@@ -182,9 +93,9 @@ export default function Orders() {
       total: formattedTotal,
       paymentMethod,
       bankName,
-      paymentStatus: o.payment_status || 'paid',
-      orderStatus: o.status || 'confirmed',
-      date: o.created_at ? o.created_at.split('T')[0] : '2026-10-25',
+      paymentStatus: o.payment_status || 'pending',
+      orderStatus: o.status || 'pending',
+      date: o.created_at ? o.created_at.split('T')[0] : '-',
       items: formattedItems.length > 0 ? formattedItems : [
         {
           name: productName,
@@ -205,12 +116,10 @@ export default function Orders() {
     api.get('/orders')
       .then((res) => {
         const rawList = Array.isArray(res.data) ? res.data : (Array.isArray(res.data?.items) ? res.data.items : [])
-        if (rawList.length > 0) {
-          const mapped = rawList.map(mapOrder)
+        const mapped = rawList.map(mapOrder)
           setOrders(mapped)
           setToastMessage('បានធ្វើបច្ចុប្បន្នភាពបញ្ជីការបញ្ជាទិញ!')
           setTimeout(() => setToastMessage(''), 2500)
-        }
       })
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -222,10 +131,8 @@ export default function Orders() {
       .then((res) => {
         if (ignore) return
         const rawList = Array.isArray(res.data) ? res.data : (Array.isArray(res.data?.items) ? res.data.items : [])
-        if (rawList.length > 0) {
-          const mapped = rawList.map(mapOrder)
+        const mapped = rawList.map(mapOrder)
           setOrders(mapped)
-        }
       })
       .catch(() => {})
       .finally(() => {

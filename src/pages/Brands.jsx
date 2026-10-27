@@ -29,7 +29,7 @@ export default function Brands() {
             name: b.name,
             slug: b.slug,
             description: b.description || 'ម៉ាកយីហោផ្លូវការ',
-            productCount: b.id === 5 ? 4 : b.id === 3 ? 1 : b.id === 4 ? 1 : 0,
+            productCount: Number(b.products_count ?? b.products?.length ?? 0),
           }))
           setBrands(mapped)
         }
