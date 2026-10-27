@@ -22,7 +22,6 @@ export default function Login() {
       : ''
   const [errorMessage, setErrorMessage] = useState(initialError)
   const [successMessage, setSuccessMessage] = useState('')
-  const [showDirectEntry, setShowDirectEntry] = useState(false)
 
   const validate = () => {
     const newErrors = {}
@@ -49,7 +48,6 @@ export default function Login() {
     setLoading(true)
     setErrorMessage('')
     setSuccessMessage('')
-    setShowDirectEntry(false)
 
     try {
       const response = await axios.post(
@@ -96,24 +94,11 @@ export default function Login() {
       } else if (error.response?.data?.message) {
         setErrorMessage('អ៊ីមែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ!')
       } else {
-        setErrorMessage('មិនអាចតភ្ជាប់ទៅកាន់ API Server បានទេ។ (អ្នកអាចប្រើប៊ូតុង "ចូល Dashboard ភ្លាមៗ" ខាងក្រោម)')
-        setShowDirectEntry(true)
+        setErrorMessage('មិនអាចតភ្ជាប់ទៅកាន់ API Server បានទេ។ សូមពិនិត្យមើលការតភ្ជាប់បណ្តាញរបស់អ្នក!')
       }
     } finally {
       setLoading(false)
     }
-  }
-
-  // Direct login fallback
-  const handleDirectDemoLogin = () => {
-    localStorage.setItem('token', 'demo-token-' + Date.now())
-    localStorage.setItem('user', JSON.stringify({
-      id: 29,
-      name: 'Mini Store Admin',
-      email: 'admin@ministore.com',
-      role_id: 1,
-    }))
-    navigate('/dashboard')
   }
 
   return (
@@ -247,19 +232,6 @@ export default function Login() {
             )}
           </button>
         </div>
-
-        {/* Direct Demo Fallback if Offline */}
-        {showDirectEntry && (
-          <div>
-            <button
-              type="button"
-              onClick={handleDirectDemoLogin}
-              className="w-full py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-xs text-emerald-800 font-bold transition-colors rounded-none cursor-pointer flex items-center justify-center gap-2"
-            >
-              <span>ចូលទៅកាន់ Dashboard ដោយផ្ទាល់ (Demo Access) →</span>
-            </button>
-          </div>
-        )}
 
         {/* Register Link */}
         <div className="text-center pt-2">
