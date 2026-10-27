@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Lock, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react'
 import axios from 'axios'
+import { API_URL } from '../utils/api'
 import AuthLayout from '../components/AuthLayout'
 
 export default function ResetPassword() {
@@ -48,7 +49,7 @@ export default function ResetPassword() {
     setSuccessMessage('')
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/auth/reset-password', {
+      const response = await axios.post(`${API_URL}/auth/reset-password`, {
         email,
         password,
         password_confirmation: passwordConfirmation,

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { KeyRound, Mail, ArrowRight, ArrowLeft, RefreshCw } from 'lucide-react'
 import axios from 'axios'
+import { API_URL } from '../utils/api'
 import AuthLayout from '../components/AuthLayout'
 
 export default function VerifyOtp() {
@@ -42,7 +43,7 @@ export default function VerifyOtp() {
     setSuccessMessage('')
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/auth/verify', {
+      const response = await axios.post(`${API_URL}/auth/verify`, {
         email,
         otp: otp.trim(),
       })
@@ -75,7 +76,7 @@ export default function VerifyOtp() {
     setSuccessMessage('')
 
     try {
-      await axios.post('http://127.0.0.1:8000/api/auth/forgot-password', { email })
+      await axios.post(`${API_URL}/auth/forgot-password`, { email })
       setSuccessMessage('លេខកូដ OTP ថ្មីត្រូវបានផ្ញើទៅកាន់អ៊ីមែលរបស់អ្នកម្តងទៀត!')
     } catch (error) {
       setErrorMessage(error.response?.data?.message || 'មិនអាចផ្ញើលេខកូដឡើងវិញបានទេ។')

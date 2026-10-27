@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { User, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import axios from 'axios'
+import { API_URL } from '../utils/api'
 import AuthLayout from '../components/AuthLayout'
 
 export default function Register() {
@@ -54,7 +55,7 @@ export default function Register() {
     setSuccessMessage('')
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/auth/register', {
+      const response = await axios.post(`${API_URL}/auth/register`, {
         name,
         email,
         password,

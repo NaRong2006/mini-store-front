@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import axios from 'axios'
+import { API_URL } from '../utils/api'
 import AuthLayout from '../components/AuthLayout'
 
 export default function Login() {
@@ -51,7 +52,7 @@ export default function Login() {
 
     try {
       const response = await axios.post(
-        'http://127.0.0.1:8000/api/auth/login',
+        `${API_URL}/auth/login`,
         {
           email,
           password,
